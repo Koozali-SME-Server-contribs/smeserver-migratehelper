@@ -1,5 +1,5 @@
 %define version 1.0
-%define release 11
+%define release 12
 Summary: Set up a migration helper script for SME Server.
 Name: smeserver-migratehelper
 Version: %{version}
@@ -11,14 +11,17 @@ Group: SMEserver/addon
 Source: migratehelper.sh
 BuildRoot: /var/tmp/%{name}-%{version}-%{release}-buildroot
 BuildArchitectures: noarch
-BuildRequires: e-smith-devtools >= 1.13.1-03
-Requires: e-smith-release >= 8.0
+BuildRequires: smeserver-devtools >= 1.13.1-03
+Requires: smeserver-release >= 8.0
 AutoReqProv: no
 
 %description
 rpm backup all contribs data and bare essential to have a working system and then rsync data while the new system is up
 
 %changelog
+* Sun Sep 08 2024 fix-e-smith-pkg.sh by Trevor Batley <trevor@batley.id.au> 1.0-12.sme
+- Fix e-smith references in smeserver-migratehelper [SME: 12732]
+
 * Sat Sep 07 2024 cvs2git.sh aka Brian Read <brianr@koozali.org> 1.0-11.sme
 - Roll up patches and move to git repo [SME: 12338]
 
