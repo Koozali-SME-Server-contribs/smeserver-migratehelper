@@ -1,5 +1,5 @@
 %define version 1.0
-%define release 12
+%define release 13
 Summary: Set up a migration helper script for SME Server.
 Name: smeserver-migratehelper
 Version: %{version}
@@ -19,6 +19,9 @@ AutoReqProv: no
 rpm backup all contribs data and bare essential to have a working system and then rsync data while the new system is up
 
 %changelog
+* Tue Sep 09 2025 Jean-Philippe Pialasse <jpp@koozali.org> 1.0-13.sme
+- add missing script
+
 * Sun Sep 08 2024 fix-e-smith-pkg.sh by Trevor Batley <trevor@batley.id.au> 1.0-12.sme
 - Fix e-smith references in smeserver-migratehelper [SME: 12732]
 
