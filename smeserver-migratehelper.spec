@@ -1,5 +1,5 @@
 %define version 1.0
-%define release 13
+%define release 14
 Summary: Set up a migration helper script for SME Server.
 Name: smeserver-migratehelper
 Version: %{version}
@@ -19,6 +19,12 @@ AutoReqProv: no
 rpm backup all contribs data and bare essential to have a working system and then rsync data while the new system is up
 
 %changelog
+* Sun Nov 22 2026 Jean-Philippe Pialasse <jpp@koozali.org> 1.0-14.sme
+- use restore_list() and excludes() from esmith::Backup [SME: 13830]
+  backup  fetchmail .fetchids
+- alert in case we have to create /mnt/backup [SME: 13234]
+  also inform the total size of files we add in archive
+
 * Tue Sep 09 2025 Jean-Philippe Pialasse <jpp@koozali.org> 1.0-13.sme
 - add missing script
 

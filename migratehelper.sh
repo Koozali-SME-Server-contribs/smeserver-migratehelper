@@ -107,18 +107,10 @@ fi
 
 cd /root || exit_abnormal
 
-cat <<'EOF' >dir.list
-/etc/e-smith/templates-custom
-/etc/e-smith/templates-user-custom
-/etc/group
-/etc/gshadow
-/etc/passwd
-/etc/samba/secrets.tdb
-/etc/samba/smbpasswd
-/etc/shadow
-/etc/ssh
-/etc/sudoers
-/root
+# use the system list without /home/e-smith content
+perl -Mesmith::Backup -e 'my @list=esmith::Backup->restore_list(); print map "/$_\n", @list;'|grep -v "^/home/e-smith">dir.list
+
+cat <<'EOF' >>dir.list
 /home/e-smith/Maildir
 /home/e-smith/ssl.crt
 /home/e-smith/ssl.key
@@ -167,8 +159,11 @@ EOF
 
 ## add here inclusion from db key
 
+#add exclusion from system 
+perl -Mesmith::Backup -e 'my @list=esmith::Backup->excludes(); print map "/$_\n", @list;' >exclude.list
+
 ## exclude files
-cat <<EOF >exclude.list
+cat <<EOF >>exclude.list
 /home/e-smith/db/mysql/daily
 /home/e-smith/db/mysql/hourly
 /home/e-smith/db/mysql55/daily
@@ -280,6 +275,10 @@ EOF
 [ -e /var/lib/phone ] && cat <<'EOF' >>dir.list
 /var/lib/phone
 EOF
+[ -f /var/lib/fetchmail/.fetchids] && cat <<'EOF' >>dir.list
+/var/lib/fetchmail/.fetchids
+EOF
+
 rpm -q smeserver-freepbx >/dev/null 2>&1 && cat <<'EOF' >>dir.list
 /opt/freepbx
 /var/lib/asterisk/
@@ -525,9 +524,9 @@ echo "yum reinstall --downloadonly --downloaddir=/root/migratehelper/yumDownload
 echo "maybe followed by"
 echo "yum update --downloadonly --downloaddir=/root/migratehelper/yumDownload"
 echo "or"
-echo "yum install --downloadonly --downloaddir=/root/migratehelper/yumDownload --installroot=/root/migratehelper/ smeserver-yum --enablerepo=smeos,base --releasever=6"
+echo "yum install --downloadonly --downloaddir=/root/migratehelper/yumDownload --installroot=/root/migratehelper/ smeserver-yum --enablerepo=smeos,base --releasever=8"
 echo "or after requiring yum-utils  (bug it seems to only download to current dir whatever you do:"
-echo "cd /root/migratehelper/yumDownload; yumdownloader install --downloadonly --downloaddir=. smeserver-freepbx -y --disablerepo=* --enablerepo=\$repo --releasever=6"
+echo "cd /root/migratehelper/yumDownload; yumdownloader install --downloadonly --downloaddir=. smeserver-freepbx -y --disablerepo=* --enablerepo=\$repo --releasever=8"
 
 if [ $TEST = "n" ]; then
   echo "Stopping Services and running backup"
@@ -550,8 +549,16 @@ if [ $TEST = "n" ]; then
   
   #### prebackup
   signal-event pre-backup
+  
+  echo "Current size of files to add in backup archive (accounting...)"
+  tr '\n' '\0' < dir.list | du -shc --files0-from=- --exclude-from=exclude.list 2>/dev/null| tail -n 1
+  prompt_confirm "Can we start? [default no]" || exit 0
 
   if [ ! -d /mnt/backup ]; then
+    echo "/mnt/backup does not exists, we can create it and put smeserver.tgz on your system disk."
+    echo " However this might full your disk. Check the plan size just before this message, and the free size on your disk :"
+    df -h
+    prompt_confirm "Do you want to make the folder and save the archive there? [default no]" || exit 0
     mkdir -p /mnt/backup
   fi
 
